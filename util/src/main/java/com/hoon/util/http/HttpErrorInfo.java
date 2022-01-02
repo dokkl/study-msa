@@ -1,0 +1,53 @@
+package com.hoon.util.http;
+
+import lombok.Getter;
+import org.springframework.http.HttpStatus;
+
+import java.time.ZonedDateTime;
+
+public class HttpErrorInfo {
+    private final ZonedDateTime timestamp;
+    private final String path;
+    private final HttpStatus httpStatus;
+    private final String message;
+
+    @Getter
+    private final String temp;
+
+
+    public HttpErrorInfo() {
+        timestamp = null;
+        this.httpStatus = null;
+        this.path = null;
+        this.message = null;
+        this.temp = null;
+    }
+
+    public HttpErrorInfo(HttpStatus httpStatus, String path, String message) {
+        timestamp = ZonedDateTime.now();
+        this.httpStatus = httpStatus;
+        this.path = path;
+        this.message = message;
+        this.temp = "temp";
+    }
+
+    public ZonedDateTime getTimestamp() {
+        return timestamp;
+    }
+
+    public String getPath() {
+        return path;
+    }
+
+    public int getStatus() {
+        return httpStatus.value();
+    }
+
+    public String getError() {
+        return httpStatus.getReasonPhrase();
+    }
+
+    public String getMessage() {
+        return message;
+    }
+}
