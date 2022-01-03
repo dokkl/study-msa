@@ -49,11 +49,12 @@ server.error.include-message: always
 
 spring.application.name: product-composite
 
+app.eureka-server: localhost
 
 eureka:
   client:
     service-url:
-      defaultZone: http://localhost:8761/eureka/
+      defaultZone: http://${app.eureka-server}:8761/eureka/
     initial-instance-info-replication-interval-seconds: 5
     registry-fetch-interval-seconds: 5
   instance:
@@ -115,7 +116,8 @@ spring.config.activate.on-profile: docker
 
 server.port: 8080
 
-eureka.client.serviceUrl.defaultZone: http://eureka:8761/eureka/
+#eureka.client.serviceUrl.defaultZone: http://eureka:8761/eureka/
+app.eureka-server: eureka
 
 #app:
 #  product-service:

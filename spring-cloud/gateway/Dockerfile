@@ -1,6 +1,6 @@
 FROM openjdk:11.0.13
 
-EXPOSE 8761
+EXPOSE 8080
 
 ADD ./build/libs/*.jar app.jar
 
