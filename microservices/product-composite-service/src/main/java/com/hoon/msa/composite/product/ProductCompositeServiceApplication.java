@@ -1,13 +1,7 @@
 package com.hoon.msa.composite.product;
 
-import com.hoon.msa.composite.product.services.ProductCompositeIntegration;
-import com.hoon.msa.composite.product.services.ProductHealth;
-import com.hoon.msa.composite.product.services.RecommendationHealth;
-import com.hoon.msa.composite.product.services.ReviewHealth;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.SpringApplication;
-import org.springframework.boot.actuate.health.*;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
@@ -17,9 +11,6 @@ import springfox.documentation.service.ApiInfo;
 import springfox.documentation.service.Contact;
 import springfox.documentation.spring.web.plugins.Docket;
 import springfox.documentation.swagger2.annotations.EnableSwagger2WebFlux;
-
-import java.util.LinkedHashMap;
-import java.util.Map;
 
 import static java.util.Collections.emptyList;
 import static org.springframework.web.bind.annotation.RequestMethod.GET;
@@ -71,21 +62,7 @@ public class ProductCompositeServiceApplication {
 	}
 
 
-	@Autowired
-	ProductHealth productHealth;
-	@Autowired
-	RecommendationHealth recommendationHealth;
-	@Autowired
-	ReviewHealth reviewHealth;
 
-	@Bean
-	public ReactiveHealthContributor coreServices() {
-		return CompositeReactiveHealthContributor.fromMap(
-				Map.of("product", productHealth
-					 , "recommendation", recommendationHealth
-					 , "review", reviewHealth)
-		);
-	}
 
 //	@Autowired
 //	HealthAggregator healthAggregator;
@@ -104,7 +81,6 @@ public class ProductCompositeServiceApplication {
 //
 //		return new CompositeReactiveHealthIndicator(healthAggregator, registry);
 //	}
-
 
 	public static void main(String[] args) {
 		SpringApplication.run(ProductCompositeServiceApplication.class, args);

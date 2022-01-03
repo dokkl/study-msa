@@ -28,7 +28,10 @@ import static reactor.core.publisher.Mono.just;
 @RunWith(SpringRunner.class)
 @SpringBootTest(
 		webEnvironment=RANDOM_PORT,
-		properties = {"logging.level.com.hoon=DEBUG", "spring.datasource.url=jdbc:h2:mem:review-db"})
+		properties = {
+				"logging.level.com.hoon=DEBUG",
+				"spring.datasource.url=jdbc:h2:mem:review-db",
+				"eureka.client.enabled=false"})
 class ReviewServiceApplicationTests {
 	@Autowired
 	private WebTestClient client;

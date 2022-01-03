@@ -45,6 +45,12 @@ services:
       rabbitmq:
         condition: service_healthy
 
+  eureka:
+    build: spring-cloud/eureka-server
+    mem_limit: 500m
+    ports:
+      - "8761:8761"
+
   # $ mongo
   mongodb:
     platform: linux/x86_64    # 추가된 라인 for mac M1
