@@ -11,6 +11,8 @@ import com.hoon.api.event.Event;
 import com.hoon.util.exceptions.InvalidInputException;
 import com.hoon.util.exceptions.NotFoundException;
 import com.hoon.util.http.HttpErrorInfo;
+import io.github.resilience4j.circuitbreaker.annotation.CircuitBreaker;
+import io.github.resilience4j.retry.annotation.Retry;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -25,10 +27,13 @@ import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
 import org.springframework.web.reactive.function.client.WebClientResponseException;
+import org.springframework.web.util.UriComponentsBuilder;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.io.IOException;
+import java.net.URI;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -54,6 +59,7 @@ public class ProductCompositeIntegration  implements ProductService, Recommendat
     private final String reviewServiceUrl = "http://review";
 
     private MessageSources messageSources;
+    private final int productServiceTimeoutSec;
 
     public interface MessageSources {
 
@@ -74,7 +80,8 @@ public class ProductCompositeIntegration  implements ProductService, Recommendat
     @Autowired
     public ProductCompositeIntegration(WebClient.Builder webClientBuilder,
                                        ObjectMapper mapper,
-                                       MessageSources messageSources
+                                       MessageSources messageSources,
+                                       @Value("${app.product-service.timeoutSec}") int productServiceTimeoutSec
 //                                       @Value("${app.product-service.host}") String productServiceHost,
 //                                       @Value("${app.product-service.port}") int productServicePort,
 //                                       @Value("${app.recommendation-service.host}") String recommendationServiceHost,
@@ -87,7 +94,7 @@ public class ProductCompositeIntegration  implements ProductService, Recommendat
         this.webClientBuilder = webClientBuilder;
         this.mapper = mapper;
         this.messageSources = messageSources;
-
+        this.productServiceTimeoutSec = productServiceTimeoutSec;
 //        this.productServiceUrl        = "http://" + productServiceHost + ":" + productServicePort + "/product/";
 //        this.recommendationServiceUrl = "http://" + recommendationServiceHost + ":" + recommendationServicePort + "/recommendation?productId=";
 //        this.reviewServiceUrl         = "http://" + reviewServiceHost + ":" + reviewServicePort + "/review?productId=";
@@ -136,8 +143,10 @@ public class ProductCompositeIntegration  implements ProductService, Recommendat
                 ).build());
     }
 
+    @Retry(name = "product")
+    @CircuitBreaker(name = "product")
     @Override
-    public Mono<Product> getProduct(int productId) {
+    public Mono<Product> getProduct(int productId, int delay, int faultPercent) {
 //        try {
 //            String url = productServiceUrl + productId;
 //            log.debug("Will call getProduct API on URL: {}", url);
@@ -157,13 +166,16 @@ public class ProductCompositeIntegration  implements ProductService, Recommendat
 //                    throw ex;
 //            }
 //        }
-        String url = productServiceUrl + "/product/" + productId;
+//        String url = productServiceUrl + "/product/" + productId;
+        URI url = UriComponentsBuilder.fromUriString(productServiceUrl + "/product/{productId}?delay={delay}&faultPercent={falutPercent}")
+                .build(productId, delay, faultPercent);
         return getWebClient().get()
                 .uri(url)
                 .retrieve()
                 .bodyToMono(Product.class)
                 .log()
-                .onErrorMap(WebClientResponseException.class, ex-> handleException(ex));
+                .onErrorMap(WebClientResponseException.class, this::handleException)
+                .timeout(Duration.ofSeconds(productServiceTimeoutSec));
 
     }
 

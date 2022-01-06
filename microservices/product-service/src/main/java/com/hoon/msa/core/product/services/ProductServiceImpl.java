@@ -13,6 +13,8 @@ import org.springframework.dao.DuplicateKeyException;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Mono;
 
+import java.util.Random;
+
 @Slf4j
 @RestController
 public class ProductServiceImpl implements ProductService {
@@ -29,7 +31,14 @@ public class ProductServiceImpl implements ProductService {
     }
 
     @Override
-    public Mono<Product> getProduct(int productId) {
+    public Mono<Product> getProduct(int productId, int delay, int faultPercent) {
+        if (delay > 0) {
+            simulateDelay(delay);
+        }
+        if (faultPercent > 0) {
+            throwErrorIfBadLuck(faultPercent);
+        }
+
         log.debug("/product return the found product for productId={}", productId);
 
         if (productId < 1) throw new InvalidInputException("Invalid productId: " + productId);
@@ -51,6 +60,32 @@ public class ProductServiceImpl implements ProductService {
                     product.setServiceAddress(serviceUtil.getServiceAddress());
                     return product;
                 });
+    }
+
+    private void throwErrorIfBadLuck(int faultPercent) {
+        int randomThreshold = getRandomNumber(1, 100);
+        if (faultPercent < randomThreshold) {
+            log.debug("We got lucky, no error occurred, {} < {}", faultPercent, randomThreshold);
+        } else {
+            log.debug("Bad luck, an error occured, {} >= {}, faultPercent, randomThreshold");
+            throw new RuntimeException("Something went wrong...");
+        }
+    }
+
+    private final Random randomNumberGenerator = new Random();
+    private int getRandomNumber(int min, int max) {
+        if (max < min) {
+            throw new RuntimeException("Max must be greater than min");
+        }
+        return randomNumberGenerator.nextInt((max - min) + 1) + min;
+    }
+
+    private void simulateDelay(int delay) {
+        log.debug("Sleeping for {} seconds...", delay);
+        try {
+            Thread.sleep(delay*1000);
+        } catch (InterruptedException e) {}
+        log.debug("Moving on");
     }
 
     @Override

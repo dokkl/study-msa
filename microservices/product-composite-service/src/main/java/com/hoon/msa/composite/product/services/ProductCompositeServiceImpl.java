@@ -6,13 +6,16 @@ import com.hoon.api.core.recommendation.Recommendation;
 import com.hoon.api.core.review.Review;
 import com.hoon.util.exceptions.NotFoundException;
 import com.hoon.util.http.ServiceUtil;
+import io.github.resilience4j.circuitbreaker.CallNotPermittedException;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.integration.handler.advice.RequestHandlerCircuitBreakerAdvice;
 import org.springframework.security.core.context.ReactiveSecurityContextHolder;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextImpl;
 import org.springframework.security.oauth2.jwt.Jwt;
 import org.springframework.security.oauth2.server.resource.authentication.JwtAuthenticationToken;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Mono;
 
@@ -65,7 +68,9 @@ public class ProductCompositeServiceImpl implements ProductCompositeService {
     }
 
     @Override
-    public Mono<ProductAggregate> getCompositeProduct(int productId) {
+    public Mono<ProductAggregate> getCompositeProduct(int productId,
+                                                      int delay,
+                                                      int faultPercent) {
 //        log.debug("getCompositeProduct: lookup a product aggregate for productId: {}", productId);
 //
 //        Product product = integration.getProduct(productId);
@@ -81,12 +86,26 @@ public class ProductCompositeServiceImpl implements ProductCompositeService {
         return Mono.zip(
             values -> createProductAggregate((SecurityContext) values[0], (Product) values[1], (List<Recommendation>) values[2], (List<Review>) values[3], serviceUtil.getServiceAddress()),
             ReactiveSecurityContextHolder.getContext().defaultIfEmpty(nullSC),
-            integration.getProduct(productId),
+            integration.getProduct(productId, delay, faultPercent).onErrorReturn(CallNotPermittedException.class, getProductFallbackValue(productId)),
             integration.getRecommendations(productId).collectList(),
             integration.getReviews(productId).collectList())
                 .doOnError(ex -> log.warn("getCompositeProduct failed: {}", ex.toString()))
                 .log();
     }
+
+    private Product getProductFallbackValue(int productId) {
+
+        log.warn("Creating a fallback product for productId = {}", productId);
+
+        if (productId == 13) {
+            String errMsg = "Product Id: " + productId + " not found in fallback cache!";
+            log.warn(errMsg);
+            throw new NotFoundException(errMsg);
+        }
+
+        return new Product(productId, "Fallback product" + productId, productId, serviceUtil.getServiceAddress());
+    }
+
 
     @Override
     public Mono<Void> deleteCompositeProduct(int productId) {
