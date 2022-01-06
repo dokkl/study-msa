@@ -1,6 +1,10 @@
 server:
   port: 8761
 
+app:
+  eureka-username: u
+  eureka-password: p
+
 eureka:
   instance:
     hostname: localhost
@@ -8,7 +12,7 @@ eureka:
     registerWithEureka: false
     fetchRegistry: false
     serviceUrl:
-      defaultZone: http://${eureka.instance.hostname}:${server.port}/eureka/
+      defaultZone: http://${app.eureka-username}:${app.eureka-password}@${eureka.instance.hostname}:${server.port}/eureka/
   # from: https://github.com/spring-cloud-samples/eureka/blob/master/src/main/resources/application.yml
   server:
     waitTimeInMsWhenSyncEmpty: 0

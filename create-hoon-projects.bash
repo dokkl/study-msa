@@ -79,3 +79,15 @@ spring init \
 --dependencies=cloud-gateway \
 --version=1.0.0-SNAPSHOT \
 gateway
+
+spring init \
+--boot-version=2.6.2.RELEASE \
+--build=gradle \
+--java-version=11 \
+--packaging=jar \
+--name=authorization-server \
+--package-name=com.hoon.springcloud \
+--groupId=com.hoon.springcloud \
+--dependencies=web,actuator,security \
+--version=1.0.0-SNAPSHOT \
+authorization-server

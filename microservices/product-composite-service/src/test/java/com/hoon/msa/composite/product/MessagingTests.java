@@ -8,8 +8,9 @@ import com.hoon.api.core.recommendation.Recommendation;
 import com.hoon.api.core.review.Review;
 import com.hoon.api.event.Event;
 import com.hoon.msa.composite.product.services.ProductCompositeIntegration;
-import org.junit.Before;
-import org.junit.Test;
+
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -35,7 +36,10 @@ import static org.springframework.http.HttpStatus.OK;
 import static reactor.core.publisher.Mono.just;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(webEnvironment=RANDOM_PORT, properties = {"eureka.client.enabled=false"})
+@SpringBootTest(
+		webEnvironment=RANDOM_PORT,
+		classes = {ProductCompositeServiceApplication.class, TestSecurityConfig.class },
+		properties = {"spring.main.allow-bean-definition-overriding=true","eureka.client.enabled=false"})
 public class MessagingTests {
 
 	private static final int PRODUCT_ID_OK = 1;
@@ -55,7 +59,7 @@ public class MessagingTests {
 	BlockingQueue<Message<?>> queueRecommendations = null;
 	BlockingQueue<Message<?>> queueReviews = null;
 
-	@Before
+	@BeforeEach
 	public void setUp() {
 		queueProducts = getQueue(channels.outputProducts());
 		queueRecommendations = getQueue(channels.outputRecommendations());

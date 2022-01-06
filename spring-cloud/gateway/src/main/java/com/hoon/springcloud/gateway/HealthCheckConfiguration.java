@@ -31,6 +31,7 @@ public class HealthCheckConfiguration {
     @Bean
     ReactiveHealthContributor healthcheckMicroservices() {
         Map<String, ReactiveHealthContributor> map = new LinkedHashMap<>();
+        map.put("auth-server",       (ReactiveHealthIndicator)() -> getHealth("http://auth-server"));
         map.put("product",           (ReactiveHealthIndicator)() -> getHealth("http://product"));
         map.put("recommendation",    (ReactiveHealthIndicator)() -> getHealth("http://recommendation"));
         map.put("review",            (ReactiveHealthIndicator)() -> getHealth("http://review"));
