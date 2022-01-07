@@ -18,4 +18,12 @@ eureka:
     waitTimeInMsWhenSyncEmpty: 0
     response-cache-update-interval-ms: 5000
 
+spring.zipkin.sender.type: rabbit
+spring.sleuth.sampler.probability: 1.0
+
 management.endpoints.web.exposure.include: "*"
+
+---
+spring.config.activate.on-profile: docker
+
+spring.rabbitmq.host: rabbitmq

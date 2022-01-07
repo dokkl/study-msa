@@ -54,6 +54,9 @@ spring.rabbitmq:
   username: guest
   password: guest
 
+spring.zipkin.sender.type: rabbit
+spring.sleuth.sampler.probability: 1.0
+
 logging:
   level:
     root: INFO

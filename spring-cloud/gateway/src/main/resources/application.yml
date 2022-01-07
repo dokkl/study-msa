@@ -90,6 +90,9 @@ spring.security.oauth2.resourceserver.jwt.issuer-uri: https://dev-nwrzzteb.us.au
 management.endpoint.health.show-details: "ALWAYS"
 management.endpoints.web.exposure.include: "*"
 
+spring.zipkin.sender.type: rabbit
+spring.sleuth.sampler.probability: 1.0
+
 logging:
   level:
     root: INFO
@@ -99,6 +102,8 @@ logging:
 
 ---
 spring.config.activate.on-profile: docker
+
+spring.rabbitmq.host: rabbitmq
 
 app:
   eureka-server: eureka

@@ -17,6 +17,9 @@ eureka:
     leaseRenewalIntervalInSeconds: 5
     leaseExpirationDurationInSeconds: 5
 
+spring.zipkin.sender.type: rabbit
+spring.sleuth.sampler.probability: 1.0
+
 management.endpoint.health.show-details: "ALWAYS"
 management.endpoints.web.exposure.include: "*"
 
@@ -24,6 +27,8 @@ management.endpoints.web.exposure.include: "*"
 
 ---
 spring.config.activate.on-profile: docker
+
+spring.rabbitmq.host: rabbitmq
 
 app.eureka-server: eureka
 
